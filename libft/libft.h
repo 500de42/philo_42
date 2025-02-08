@@ -6,7 +6,7 @@
 /*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/24 20:15:19 by kcharbon          #+#    #+#             */
-/*   Updated: 2024/10/14 14:32:19 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/02/08 20:00:16 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ typedef struct s_list
 }					t_list;
 
 int					ft_atoi(const char *str);
+long long			ft_atoll(char *str);
 int					ft_isalnum(int c);
 int					ft_isalpha(int c);
 int					ft_isascii(int c);
