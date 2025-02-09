@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 19:10:18 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/08 22:39:26 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/02/09 21:57:23 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,9 @@ typedef struct t_philo
 	int				time_to_dead;
 	int				time_to_eat;
 	int				time_to_sleep;
-	long int        ms_eat;     // time of the last dinner in milliseconds
-	unsigned int    nb_eat;	// number of dinners (each time the philosopher eats nb_eat++)
-	int             finish;          // 1 when a philosopher ate m_eat times, if not, 0
+	long int        ms_eat;
+	unsigned int    nb_eat;
+	int             finish;
 	pthread_mutex_t	*r_f;
 	pthread_mutex_t	l_f;
 }					t_philo;
