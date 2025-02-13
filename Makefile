@@ -1,7 +1,7 @@
-OBJS = main.o error.o utils.o init_struct.o
+OBJS = main.o error.o utils.o init_struct.o routine.o
 SRCS = $(OBJS:.o=.c)
 NAME = philo
-GFLAGS = -Wall -Werror -Wextra -g
+GFLAGS = -Wall -Werror -Wextra -g3
 LIBFTDIR = libft/
 LIBFT = $(LIBFTDIR)libft.a
 
@@ -16,7 +16,7 @@ $(LIBFT):
 	$(MAKE) -C $(LIBFTDIR)
 
 %.o: %.c
-	cc $(CFLAGS) -c $< -o $@ -I./
+	cc $(GFLAGS) -c $< -o $@ -I./
 
 clean:
 	rm -rf $(OBJS)
