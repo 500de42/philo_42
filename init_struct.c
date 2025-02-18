@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   init_struct.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:45:38 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/13 21:31:43 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/02/18 18:48:10 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
 void	init_val_philo(t_philo *tmp, char **av, int i, int ac)
-{
+{	
 	tmp->id_philo = i + 1;
 	if (ac == 6)
 		tmp->nb_eat = ft_atoi(av[5]);
@@ -25,43 +25,45 @@ void	init_val_philo(t_philo *tmp, char **av, int i, int ac)
 	tmp->time_to_eat = ft_atoi(av[3]);
 	tmp->time_to_sleep = ft_atoi(av[4]);
 	tmp->i = i;
+	tmp->philo_dead = 0;
 	pthread_mutex_init(&tmp->left_fork, NULL);
 }
 
-void	init_philo(char **av, int ac, t_data *data)
+void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
 {
 	int	i;
 
 	i = -1;
-	data->philo_list = malloc(sizeof(t_philo *) * (data->nb_philo + 1));
-	if (!data->philo_list)
+	*philo_list = malloc(sizeof(t_philo *) * (ft_atoi(av[1]) + 1));
+	if (!*philo_list)
 	{
 		// fonction qui free tout
 		return ;
 	}
 	while (++i < data->nb_philo)
 	{
-		data->philo_list[i] = malloc(sizeof(t_philo));
-		if (!data->philo_list[i])
+		(*philo_list)[i] = malloc(sizeof(t_philo));
+		if (!(*philo_list)[i])
 		{
-			erreur_init_philo(data->philo_list, i);
+			erreur_init_philo(*philo_list, i);
 			ft_putstr_fd("error initialisation", 2);
 			exit(1);
 		}
-		init_val_philo(data->philo_list[i], av, i, ac);
+		(*philo_list)[i]->d = data;
+		(*philo_list)[i]->last_eat = data->starting_time;
+		// ft_printf("\n\n%d\n\n%d\n\n", data->starting_time, (*philo_list)[i]->last_eat);
+		init_val_philo((*philo_list)[i], av, i, ac);
 	}
-	data->philo_list[i] = NULL;
+	(*philo_list)[i] = NULL;
 	i = -1;
-	while (++i < data->nb_philo)
+	while ((*philo_list)[++i])
 	{
 		if (ft_atoi(av[1]) > 1)
 		{
 			if (i == 0)
-				data->philo_list[i]->right_fork = &data->philo_list[ft_atoi(av[1])
-					- 1]->left_fork;
+				(*philo_list)[i]->right_fork = &(*philo_list)[ft_atoi(av[1]) - 1]->left_fork;
 			else
-				data->philo_list[i]->right_fork = &data->philo_list[i
-					- 1]->left_fork;
+				(*philo_list)[i]->right_fork = &(*philo_list)[i - 1]->left_fork;
 		}
 	}
 }
@@ -77,5 +79,6 @@ int	init_data(t_data **data, size_t time_, char **av)
 	(*data)->time_to_sleep = ft_atoi(av[4]);
 	(*data)->time_to_eat = ft_atoi(av[3]);
 	pthread_mutex_init(&(*data)->mutex_for_print, NULL);
+	pthread_mutex_init(&(*data)->last_eat_mutex, NULL);
 	return (0);
 }

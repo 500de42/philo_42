@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:01:58 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/13 21:40:06 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/02/18 19:12:11 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,17 +18,17 @@ void	create_thread(t_philo **philo, t_data *data)
 
 	i = -1;
 	if (pthread_create(&data->philo_get, NULL, routine_thread,
-			NULL) != 0)
+		 (void *)philo) != 0)
 	{
 		ft_putstr_fd("error creation pthread_getteur\n", 2);
 		// fonction qui clear tout
 		return ;
-	}
+	}	
 	while (++i < data->nb_philo)
 	{
 		data->i = i;
-		data->philo_list[i]->i = i;
-		if (pthread_create(&philo[i]->philo, NULL, routine, NULL) != 0)
+		philo[i]->i = i;
+		if (pthread_create(&philo[i]->philo, NULL, routine, (void *)philo[i]) != 0)
 		{
 			ft_putstr_fd("error creation pthread\n", 2);
 			// fonction qui clear tout
@@ -42,7 +42,7 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 	int	i;
 
 	i = 0;
-	while (i < data->nb_philo)
+	while (philo[i])
 	{
 		if (pthread_join(philo[i]->philo, NULL) != 0)
 		{
@@ -72,11 +72,24 @@ size_t	get_time_programme(t_data *data)
 	return ((get_current_time()) - data->starting_time);
 }
 
-int	get_dead_time(t_data *data, int i)
+int	get_dead_time(t_data *data, int i, t_philo **philo_list)
 {
 	size_t	is_dead;
-
-	is_dead = (size_t)get_current_time - data->philo_list[i]->last_eat;
+	
+	if (i < 0 || i >= data->nb_philo)
+	{
+    	pthread_mutex_lock(&data->mutex_for_print);
+    	ft_printf("Index %d hors limites !\n", i);
+    	pthread_mutex_unlock(&data->mutex_for_print);
+    	return (0);
+	}
+	pthread_mutex_lock(&data->last_eat_mutex);
+	is_dead = get_current_time() - philo_list[i]->last_eat;
+	pthread_mutex_lock(&data->mutex_for_print);
+	ft_printf("\n\ncurrent time %d\n\nphilo %d\n\ncalcul isdead %d\n\nlast eat %d\n\ntimetodead%d\n\n", 
+		get_current_time(),philo_list[i]->id_philo, is_dead, philo_list[i]->last_eat, data->time_to_dead);
+	pthread_mutex_unlock(&data->mutex_for_print);
+	pthread_mutex_unlock(&data->last_eat_mutex);
 	if (is_dead >= (size_t)data->time_to_dead)
 		return (1);
 	return (0);

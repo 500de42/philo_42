@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/15 15:14:32 by kcharbon          #+#    #+#             */
-/*   Updated: 2024/12/19 16:32:34 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/02/15 18:09:26 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ char	**st_free(char **tab)
 		j++;
 	}
 	free(tab);
-	return (tab);
+	return (NULL);
 }
 
 void	rep(char const *s, char c, char **tab, int count)
