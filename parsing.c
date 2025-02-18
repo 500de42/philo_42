@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/08 19:46:19 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/09 21:19:14 by marvin           ###   ########.fr       */
+/*   Updated: 2025/02/18 20:48:07 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void	check_arg(char **av, int ac)
 	int	i;
 	int	j;
 
-	i = 1;
+	i = 0;
 	while (av[++i])
 	{
 		check_before_loop(av, i, ac);
