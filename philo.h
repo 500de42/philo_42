@@ -38,6 +38,7 @@ typedef struct s_philo
 	int 			nb_eat;
 	t_data			*d;
 }					t_philo;
+
 int					init_data(t_data **data, size_t time_, char **av);
 void				check_arg(char **av, int ac);
 void				init_val_philo(t_philo *tmp, char **av, int i, int ac);

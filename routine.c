@@ -6,7 +6,7 @@
 /*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 21:01:09 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/18 19:06:10 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/02/18 21:37:22 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,9 @@ void	*routine(void *random)
 	p = (t_philo *)random;
 	nb_eat = 0;
 	if (p->i % 2 == 0)
-		usleep(p->time_to_eat / 10);
+		usleep((p->time_to_eat / 10) * 1000);
 	while (1)
 	{		
-		if (p->philo_dead == 1)
-		{
-			ft_printf("philo %d est mort\n", p->id_philo);
-			exit(1);
-			// fonction qui clear tout
-		}
 		if (p->nb_eat > 0)
 			if (nb_eat == p->nb_eat)
 				{		
@@ -45,16 +39,20 @@ void	*routine(void *random)
 		pthread_mutex_lock(&p->d->last_eat_mutex);
 		p->last_eat = get_current_time();
 		pthread_mutex_unlock(&p->d->last_eat_mutex);
-		usleep(p->time_to_eat);
+		usleep(p->time_to_eat * 1000);
 		pthread_mutex_unlock(&p->left_fork);
 		pthread_mutex_unlock(p->right_fork);
 		pthread_mutex_lock(&p->d->mutex_for_print);
 		ft_printf("philo %d dors\n", p->id_philo);
 		pthread_mutex_unlock(&p->d->mutex_for_print);
-		usleep(p->time_to_sleep);
+		usleep(p->time_to_sleep * 1000);
 		pthread_mutex_lock(&p->d->mutex_for_print);
 		ft_printf("philo %d pense\n", p->id_philo);
 		pthread_mutex_unlock(&p->d->mutex_for_print);
+		if (p->time_to_eat > p->time_to_sleep)
+			usleep((p->time_to_eat - p->time_to_sleep) * 1000);
+		else
+			usleep((p->time_to_sleep - p->time_to_eat) * 1000);		
 		nb_eat++;
 	}
 	return (NULL);
@@ -83,7 +81,7 @@ void	*routine_thread(void *random)
 					philo_list[i]->id_philo);
 				pthread_mutex_unlock(&data->mutex_for_print);
 				philo_list[i]->philo_dead = 1;
-				exit(1);
+				// exit(1);
 				// fonction qui stop tout et clear
 			}
 			i++;

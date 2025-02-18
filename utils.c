@@ -6,7 +6,7 @@
 /*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:01:58 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/18 19:12:11 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/02/18 21:41:45 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,10 +85,11 @@ int	get_dead_time(t_data *data, int i, t_philo **philo_list)
 	}
 	pthread_mutex_lock(&data->last_eat_mutex);
 	is_dead = get_current_time() - philo_list[i]->last_eat;
-	pthread_mutex_lock(&data->mutex_for_print);
-	ft_printf("\n\ncurrent time %d\n\nphilo %d\n\ncalcul isdead %d\n\nlast eat %d\n\ntimetodead%d\n\n", 
-		get_current_time(),philo_list[i]->id_philo, is_dead, philo_list[i]->last_eat, data->time_to_dead);
-	pthread_mutex_unlock(&data->mutex_for_print);
+	//pthread_mutex_lock(&data->mutex_for_print);
+	// ft_printf("\n\ncurrent time %d\nphilo %d\ncalcul isdead %d\nlast eat %d\ntimetodead%d\n\n", 
+	// get_current_time(),philo_list[i]->id_philo, is_dead, philo_list[i]->last_eat, data->time_to_dead);
+	// ft_printf("\nnb %d isdead %d\n", philo_list[i]->id_philo,is_dead);
+	//pthread_mutex_unlock(&data->mutex_for_print);
 	pthread_mutex_unlock(&data->last_eat_mutex);
 	if (is_dead >= (size_t)data->time_to_dead)
 		return (1);
