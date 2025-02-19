@@ -6,7 +6,7 @@
 /*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:45:38 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/18 18:48:10 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/02/19 20:00:28 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,13 @@ void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
 			exit(1);
 		}
 		(*philo_list)[i]->d = data;
-		(*philo_list)[i]->last_eat = data->starting_time;
+		(*philo_list)[i]->last_eat = malloc(sizeof (size_t));
+		if (!((*philo_list)[i]->last_eat))
+		{
+			ft_printf("erreur malloc variable last_eat");
+			exit(1);
+		}
+		*(*philo_list)[i]->last_eat = data->starting_time;
 		// ft_printf("\n\n%d\n\n%d\n\n", data->starting_time, (*philo_list)[i]->last_eat);
 		init_val_philo((*philo_list)[i], av, i, ac);
 	}

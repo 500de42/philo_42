@@ -6,7 +6,7 @@
 /*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 21:01:09 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/18 21:37:22 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/02/19 19:55:51 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,73 +20,96 @@ void	*routine(void *random)
 	p = (t_philo *)random;
 	nb_eat = 0;
 	if (p->i % 2 == 0)
-		usleep((p->time_to_eat / 10) * 1000);
+		ft_usleep(100);
 	while (1)
 	{		
 		if (p->nb_eat > 0)
 			if (nb_eat == p->nb_eat)
-				{		
+				{
 					pthread_mutex_lock(&p->d->mutex_for_print);
 					ft_printf("simulation fini\n");
 					pthread_mutex_unlock(&p->d->mutex_for_print);
 					exit(0);
 				}
-		pthread_mutex_lock(&p->d->mutex_for_print);
-		ft_printf("philo %d mange\n", p->id_philo);
-		pthread_mutex_unlock(&p->d->mutex_for_print);
-		pthread_mutex_lock(&p->left_fork);
-		pthread_mutex_lock(p->right_fork);
+		if (p->i % 2 == 0)
+		{
+			
+			pthread_mutex_lock(&p->left_fork);
+			pthread_mutex_lock(p->right_fork);
+			pthread_mutex_lock(&p->d->mutex_for_print);
+			ft_printf("%d philo %d has taken left fork\n", get_time_programme(p->d), p->id_philo);
+			ft_printf("%d philo %d has taken right fork\n", get_time_programme(p->d), p->id_philo);			
+			pthread_mutex_unlock(&p->d->mutex_for_print);
+		}
+		else
+		{
+			
+			pthread_mutex_lock(p->right_fork);
+			pthread_mutex_lock(&p->left_fork);
+			pthread_mutex_lock(&p->d->mutex_for_print);
+			ft_printf("%d philo %d has taken right fork\n", get_time_programme(p->d), p->id_philo);
+			ft_printf("%d philo %d has taken left fork\n", get_time_programme(p->d), p->id_philo);
+			pthread_mutex_unlock(&p->d->mutex_for_print);
+		}
 		pthread_mutex_lock(&p->d->last_eat_mutex);
-		p->last_eat = get_current_time();
+		*p->last_eat = get_current_time();
 		pthread_mutex_unlock(&p->d->last_eat_mutex);
-		usleep(p->time_to_eat * 1000);
+		pthread_mutex_lock(&p->d->mutex_for_print);
+		ft_printf("%ld philo %d mange\n", get_time_programme(p->d), p->id_philo);
+		pthread_mutex_unlock(&p->d->mutex_for_print);
+		pthread_create(&p->philo, NULL, verif_eat, (void *)p);
 		pthread_mutex_unlock(&p->left_fork);
 		pthread_mutex_unlock(p->right_fork);
 		pthread_mutex_lock(&p->d->mutex_for_print);
-		ft_printf("philo %d dors\n", p->id_philo);
+		ft_printf("%ld philo %d dors\n",get_time_programme(p->d), p->id_philo);
 		pthread_mutex_unlock(&p->d->mutex_for_print);
-		usleep(p->time_to_sleep * 1000);
+		pthread_create(&p->philo, NULL, verif_sleep, (void *)p);
 		pthread_mutex_lock(&p->d->mutex_for_print);
-		ft_printf("philo %d pense\n", p->id_philo);
-		pthread_mutex_unlock(&p->d->mutex_for_print);
-		if (p->time_to_eat > p->time_to_sleep)
-			usleep((p->time_to_eat - p->time_to_sleep) * 1000);
-		else
-			usleep((p->time_to_sleep - p->time_to_eat) * 1000);		
+		ft_printf("%ld philo %d pense\n",get_time_programme(p->d), p->id_philo);
+		pthread_mutex_unlock(&p->d->mutex_for_print);	
 		nb_eat++;
 	}
 	return (NULL);
 }
 
-void	*routine_thread(void *random)
+void	*verif_eat(void *random)
 {
-	int		i;
-	t_philo	**philo_list;
+	t_philo	*philo;
 	t_data	*data;
 
-	philo_list = (t_philo **)random;
-	data = philo_list[0]->d;
-	while (1)
+	philo = (t_philo *)random;
+	data = philo->d;
+	ft_usleep(philo->time_to_eat + 1);
+	if (get_dead_time(data, philo))
 	{
-		i = 0;
-		while (i < data->nb_philo)
-		{	
-			// pthread_mutex_lock(&philo_list[i]->d->mutex_for_print);
-			// ft_printf("nb philo%d\n%d", philo_list[i]->d->nb_philo, i);
-			// pthread_mutex_unlock(&philo_list[i]->d->mutex_for_print);
-			if (get_dead_time(data, i, philo_list))
-			{
-				pthread_mutex_lock(&data->mutex_for_print);
-				ft_printf("the philo %d is dead\n",
-					philo_list[i]->id_philo);
-				pthread_mutex_unlock(&data->mutex_for_print);
-				philo_list[i]->philo_dead = 1;
-				// exit(1);
-				// fonction qui stop tout et clear
-			}
-			i++;
-		}
-		
+		pthread_mutex_lock(&data->mutex_for_print);
+		ft_printf("the philo %d is dead\n",
+			philo->id_philo);
+		pthread_mutex_unlock(&data->mutex_for_print);
+		philo->philo_dead = 1;
+		exit(1);
+		// fonction qui stop tout et clear
+	}
+	return (NULL);
+}
+
+void	*verif_sleep(void *random)
+{
+	t_philo	*philo;
+	t_data	*data;
+
+	philo = (t_philo *)random;
+	data = philo->d;
+	ft_usleep(philo->time_to_sleep + 1);
+	if (get_dead_time(data, philo))
+	{
+		pthread_mutex_lock(&data->mutex_for_print);
+		ft_printf("the philo %d is dead\n",
+			philo->id_philo);
+		pthread_mutex_unlock(&data->mutex_for_print);
+		philo->philo_dead = 1;
+		exit(1);
+		// fonction qui stop tout et clear
 	}
 	return (NULL);
 }
