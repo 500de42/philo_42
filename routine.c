@@ -6,7 +6,7 @@
 /*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 21:01:09 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/22 22:13:19 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/02/22 23:48:17 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,25 +31,23 @@ int	only_one_philo(t_philo *p)
 
 void	take_fork(t_philo *p)
 {
+	pthread_mutex_lock(&p->d->mutex_for_dead);
 	if (!p->d->philo_dead)
 	{
+		pthread_mutex_unlock(&p->d->mutex_for_dead);
 		if ((p->id_philo % 2) == 0)
 		{
 			pthread_mutex_lock(&p->left_fork);
 			pthread_mutex_lock(p->right_fork);
-			pthread_mutex_lock(&p->d->mutex_for_print);
-			ft_printf("%d philo %d has taken left fork\n", get_time_programme(p->d), p->id_philo);
-			ft_printf("%d philo %d has taken right fork\n", get_time_programme(p->d), p->id_philo);			
-			pthread_mutex_unlock(&p->d->mutex_for_print);
+			safe_print("has taken left fork", p);
+			safe_print("has taken right fork", p);
 		}
 		else
 		{
 			pthread_mutex_lock(p->right_fork);
 			pthread_mutex_lock(&p->left_fork);
-			pthread_mutex_lock(&p->d->mutex_for_print);
-			ft_printf("%d philo %d has taken right fork\n", get_time_programme(p->d), p->id_philo);
-			ft_printf("%d philo %d has taken left fork\n", get_time_programme(p->d), p->id_philo);
-			pthread_mutex_unlock(&p->d->mutex_for_print);
+			safe_print("has taken right fork", p);
+			safe_print("has taken left fork", p);
 		}
 	}
 }
@@ -63,25 +61,18 @@ int	check_meal(t_philo *p, int nb_eat, t_data *data)
 			data->count_meal++;
 		if(data->count_meal == p->nb_eat)
 		{
-			pthread_mutex_lock(&p->d->mutex_for_print);
-			ft_printf("simulation fini\n");
-			pthread_mutex_unlock(&p->d->mutex_for_print);
+			pthread_mutex_lock(&data->mutex_for_dead);
+			if (!data->philo_dead)
+			{
+				pthread_mutex_lock(&p->d->mutex_for_print);
+				ft_printf("simulation fini\n");
+				pthread_mutex_unlock(&p->d->mutex_for_print);
+			}
+			
 			return (1);
 		}
 		pthread_mutex_unlock(&p->d->mutex_for_count_meal);
 	}
-	return (0);
-}
-
-int check_dead(t_philo *p, t_data *data)
-{
-	pthread_mutex_lock(&data->mutex_for_dead);
-	if (p->d->philo_dead)
-	{
-		pthread_mutex_unlock(&data->mutex_for_dead);
-		return (1);
-	}
-	pthread_mutex_unlock(&data->mutex_for_dead);
 	return (0);
 }
 
@@ -91,19 +82,9 @@ void	routine_philo(t_philo *p)
 	pthread_mutex_lock(&p->d->last_eat_mutex);
 	*p->last_eat = get_current_time();
 	pthread_mutex_unlock(&p->d->last_eat_mutex);
-	pthread_mutex_lock(&p->d->mutex_for_print);
-	ft_printf("test\n", get_time_programme(p->d), p->id_philo);
-	pthread_mutex_unlock(&p->d->mutex_for_print);
-
 	pthread_create(&p->philo, NULL, verif_dead, (void *)p);
-	pthread_mutex_lock(&p->d->mutex_for_print);
-	pthread_mutex_lock(&p->d->mutex_for_dead);
-	if (!p->d->philo_dead)
-		ft_printf("%d philo %d is eating\n", get_time_programme(p->d), p->id_philo);
-		pthread_mutex_unlock(&p->d->mutex_for_dead);
-	pthread_mutex_unlock(&p->d->mutex_for_print);
-	ft_usleep(p->time_to_eat);
-	pthread_mutex_unlock(&p->d->mutex_for_dead);
+	if (!safe_print("is eating", p))
+		ft_usleep(p->time_to_eat);
 	if (p->id_philo % 2 == 0)
 	{	
 		pthread_mutex_unlock(p->right_fork);
@@ -115,13 +96,9 @@ void	routine_philo(t_philo *p)
 		pthread_mutex_unlock(p->right_fork);
 	}
 	pthread_create(&p->philo, NULL, verif_dead, (void *)p);
-	pthread_mutex_lock(&p->d->mutex_for_print);
-	ft_printf("%d philo %d is sleeping\n",get_time_programme(p->d), p->id_philo);
-	pthread_mutex_unlock(&p->d->mutex_for_print);
-	ft_usleep(p->time_to_sleep + 1);
-	pthread_mutex_lock(&p->d->mutex_for_print);
-	ft_printf("%d philo %d is thinking\n",get_time_programme(p->d), p->id_philo);
-	pthread_mutex_unlock(&p->d->mutex_for_print);
+	if (!safe_print("is sleeping", p))
+		ft_usleep(p->time_to_sleep + 1);
+	safe_print("is thinking", p);
 }
 
 void	*routine(void *random)

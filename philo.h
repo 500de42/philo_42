@@ -61,6 +61,7 @@ int					only_one_philo(t_philo *p);
 void				take_fork(t_philo *p);
 void				routine_philo(t_philo *p);
 int					check_meal(t_philo *p, int nb_eat, t_data *data);
+int    				safe_print(char *str, t_philo *ph);
 
 ////////////////////    erreurs     ///////////////////////
 
