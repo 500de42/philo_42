@@ -6,7 +6,7 @@
 /*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:01:58 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/19 19:46:05 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/02/22 21:30:33 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ void	create_thread(t_philo **philo, t_data *data)
 	int	i;
 
 	i = -1;
+	data->starting_time = get_current_time();
 	while (++i < data->nb_philo)
 	{
 		data->i = i;
@@ -35,7 +36,7 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 	int	i;
 
 	i = 0;
-	while (philo[i])
+	while (i < data->nb_philo)
 	{
 		if (pthread_join(philo[i]->philo, NULL) != 0)
 		{
@@ -43,11 +44,6 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 			// fonction qui clean tout
 		}
 		i++;
-	}
-	if (pthread_join(data->philo_get, NULL) != 0)
-	{
-		ft_putstr_fd("error pthread_join philo get", 2);
-		// fonction qui clean tout
 	}
 }
 
