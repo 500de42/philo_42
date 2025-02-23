@@ -21,7 +21,6 @@ typedef struct s_data
 	size_t			starting_time;
 	pthread_mutex_t	mutex_for_dead;
 	pthread_mutex_t	mutex_for_print;
-	pthread_mutex_t	dead_time_mutex;
 	pthread_mutex_t	last_eat_mutex;
 	pthread_mutex_t	mutex_for_count_meal;
 }					t_data;
@@ -34,11 +33,11 @@ typedef struct s_philo
 	int				time_before_dead;
 	int				time_to_eat;
 	int				time_to_sleep;
-	long int		ms_eat;
-	unsigned int	count_eat;
+	int				count_eat;
 	int 			nb_eat;
 	pthread_t		philo;
-	pthread_t		philo_get;
+	pthread_t		thread_eat;
+	pthread_t		thread_sleep;
 	size_t			*last_eat;
 	pthread_mutex_t	*right_fork;
 	pthread_mutex_t	left_fork;
@@ -58,12 +57,15 @@ void				create_thread(t_philo **philo, t_data *data);
 void				*verif_dead(void *random);
 void				ft_usleep(long int time_in_ms);
 int					only_one_philo(t_philo *p);
-void				take_fork(t_philo *p);
-void				routine_philo(t_philo *p);
-int					check_meal(t_philo *p, int nb_eat, t_data *data);
+int					take_fork(t_philo *p);
+int					routine_philo(t_philo *p);
+int					check_meal(t_philo *p,t_data *data);
 int    				safe_print(char *str, t_philo *ph);
+void				let_go_forks(t_philo *p);
+
 
 ////////////////////    erreurs     ///////////////////////
 
 void				erreur_init_philo(t_philo **philo_list, int index);
+
 #endif

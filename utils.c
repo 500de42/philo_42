@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:01:58 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/22 21:30:33 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/02/23 20:34:20 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ void	create_thread(t_philo **philo, t_data *data)
 	{
 		data->i = i;
 		philo[i]->i = i;
-		if (pthread_create(&philo[i]->philo, NULL, routine, (void *)philo[i]) != 0)
+		if (pthread_create(&philo[i]->philo, NULL, routine,
+				(void *)philo[i]) != 0)
 		{
 			ft_putstr_fd("error creation pthread\n", 2);
 			// fonction qui clear tout
@@ -41,10 +42,25 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 		if (pthread_join(philo[i]->philo, NULL) != 0)
 		{
 			ft_putstr_fd("error pthread_join", 2);
-			// fonction qui clean tout
 		}
 		i++;
 	}
+	if (data->count_meal == philo[0]->nb_eat)
+	{
+		pthread_mutex_destroy(&data->mutex_for_print);
+		pthread_mutex_destroy(&data->mutex_for_count_meal);
+		pthread_mutex_destroy(&data->mutex_for_dead);
+		pthread_mutex_destroy(&data->last_eat_mutex);
+		i = -1;
+		while (++i < data->nb_philo)
+		{
+			free(philo[i]->last_eat);
+			pthread_mutex_destroy(&philo[i]->left_fork);
+			free(philo[i]);
+		}
+		free(philo);
+	}
+	return ;
 }
 
 size_t	get_current_time(void)
@@ -72,8 +88,3 @@ int	get_dead_time(t_data *data, t_philo *philo_list)
 		return (1);
 	return (0);
 }
-	//pthread_mutex_lock(&data->mutex_for_print);
-	// ft_printf("\n\ncurrent time %d\nphilo %d\ncalcul isdead %d\nlast eat %d\ntimetodead%d\n\n", 
-	// get_current_time(),philo_list[i]->id_philo, is_dead, philo_list[i]->last_eat, data->time_to_dead);
-	// ft_printf("nb %d time_last eat %d\n", philo_list[i]->id_philo,is_dead);
-	// pthread_mutex_unlock(&data->mutex_for_print);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_struct.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:45:38 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/22 21:47:54 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/02/23 19:42:42 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ void	init_val_philo(t_philo *tmp, char **av, int i, int ac)
 	else
 		tmp->nb_eat = 0;
 	tmp->count_eat = 0;
-	tmp->ms_eat = 0;
 	tmp->time_before_dead = ft_atoi(av[2]);
 	tmp->time_to_eat = ft_atoi(av[3]);
 	tmp->time_to_sleep = ft_atoi(av[4]);
@@ -58,7 +57,6 @@ void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
 			exit(1);
 		}
 		*(*philo_list)[i]->last_eat = data->starting_time;
-		// ft_printf("\n\n%d\n\n%d\n\n", data->starting_time, (*philo_list)[i]->last_eat);
 		init_val_philo((*philo_list)[i], av, i, ac);
 	}
 	(*philo_list)[i] = NULL;

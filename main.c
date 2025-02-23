@@ -15,6 +15,8 @@
 
 #include "philo.h"
 
+void	ft_free_array(char **tab);
+
 int	main(int ac, char **av)
 {
 	t_data *data;
@@ -25,4 +27,6 @@ int	main(int ac, char **av)
 	init_philo(av, ac, &philo_list, data);
 	create_thread(philo_list, data);
 	loop_for_wait_philo(philo_list, data);
+	free(data);
+	// ft_free_array((char **)philo_list);
 }
