@@ -6,7 +6,7 @@
 /*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:01:58 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/23 20:34:20 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/02/26 18:12:44 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 	i = 0;
 	while (i < data->nb_philo)
 	{
-		if (pthread_join(philo[i]->philo, NULL) != 0)
+		if (pthread_join(philo[i]->philo, NULL))
 		{
 			ft_putstr_fd("error pthread_join", 2);
 		}
@@ -58,6 +58,7 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 			pthread_mutex_destroy(&philo[i]->left_fork);
 			free(philo[i]);
 		}
+		free(data);
 		free(philo);
 	}
 	return ;

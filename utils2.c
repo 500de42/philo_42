@@ -6,7 +6,7 @@
 /*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 18:15:06 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/23 22:20:27 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/02/26 19:59:56 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,38 @@ void	ft_usleep(long int time_in_ms)
 		usleep(time_in_ms / 10);
 }
 
+// void	*verif_dead(void *random)
+// {
+// 	t_philo	*philo;
+// 	t_data	*data;
+// 	size_t	last_eat;
+
+// 	philo = (t_philo *)random;
+// 	data = philo->d;
+// 	pthread_mutex_lock(&data->last_eat_mutex);
+// 	last_eat = *philo->last_eat;
+// 	pthread_mutex_unlock(&data->last_eat_mutex);
+// 	while ((get_current_time() - last_eat) < (size_t)philo->time_before_dead)
+// 		usleep(100);
+// 	if ((get_current_time() - last_eat) >= (size_t)philo->time_before_dead)
+// 	{
+// 		pthread_mutex_lock(&data->mutex_for_dead);
+// 		if (data->philo_dead)
+// 		{
+// 			pthread_mutex_unlock(&data->mutex_for_dead);
+// 			return (NULL);
+// 		}
+// 		data->philo_dead = true;
+// 		pthread_mutex_unlock(&data->mutex_for_dead);
+// 		pthread_mutex_lock(&data->mutex_for_print);
+// 		ft_printf("%d the philo %d died", get_time_programme(data),
+// 			philo->id_philo);
+// 		pthread_mutex_unlock(&data->mutex_for_print);
+// 		return (NULL);
+// 	}
+// 	return (NULL);
+// }
+
 void	*verif_dead(void *random)
 {
 	t_philo	*philo;
@@ -30,25 +62,28 @@ void	*verif_dead(void *random)
 
 	philo = (t_philo *)random;
 	data = philo->d;
-	pthread_mutex_lock(&data->last_eat_mutex);
-	last_eat = *philo->last_eat;
-	pthread_mutex_unlock(&data->last_eat_mutex);
-	while ((get_current_time() - last_eat) < (size_t)philo->time_before_dead)
-		ft_usleep(100);
-	if ((get_current_time() - last_eat) >= (size_t)philo->time_before_dead)
+	while (1)
 	{
-		pthread_mutex_lock(&data->mutex_for_dead);
-		if (data->philo_dead)
+		pthread_mutex_lock(&data->last_eat_mutex);
+		last_eat = *philo->last_eat;
+		pthread_mutex_unlock(&data->last_eat_mutex);
+		if ((get_current_time() - last_eat) >= (size_t)philo->time_before_dead)
 		{
+			pthread_mutex_lock(&data->mutex_for_dead);
+			if (data->philo_dead)
+			{
+				pthread_mutex_unlock(&data->mutex_for_dead);
+				return (NULL);
+			}
+			data->philo_dead = true;
 			pthread_mutex_unlock(&data->mutex_for_dead);
+			pthread_mutex_lock(&data->mutex_for_print);
+			ft_printf("%d the philo %d died\n", get_time_programme(data),
+				philo->id_philo);
+			pthread_mutex_unlock(&data->mutex_for_print);
 			return (NULL);
 		}
-		data->philo_dead = true;
-		pthread_mutex_unlock(&data->mutex_for_dead);
-		pthread_mutex_lock(&data->mutex_for_print);
-		ft_printf("%d the philo %d died", get_time_programme(data), philo->id_philo);
-		pthread_mutex_unlock(&data->mutex_for_print);
-		return (NULL);
+		usleep(500 * 1000);
 	}
 	return (NULL);
 }
@@ -60,11 +95,22 @@ int	safe_print(char *str, t_philo *ph)
 
 	data = ph->d;
 	pthread_mutex_lock(&data->mutex_for_dead);
-	if (data->philo_dead == true)
+	pthread_mutex_lock(&data->mutex_finish);
+	if (data->philo_dead == true || ph->count_eat == ph->nb_eat
+		|| data->finish == 1)
 	{
 		pthread_mutex_unlock(&data->mutex_for_dead);
+		if (data->finish)
+		{
+			pthread_mutex_unlock(&data->mutex_finish);
+			return (1);
+		}
+		pthread_mutex_unlock(&data->mutex_finish);
+		if (ph->count_eat == ph->nb_eat)
+			return (2);
 		return (1);
 	}
+	pthread_mutex_unlock(&data->mutex_finish);
 	pthread_mutex_unlock(&data->mutex_for_dead);
 	time = get_time_programme(data);
 	pthread_mutex_lock(&data->mutex_for_print);
@@ -89,11 +135,11 @@ void	let_go_forks(t_philo *p)
 
 // pthread_mutex_lock(&data->mutex_for_print);
 // ft_printf("DEBUG: last_eat address = %p, value = %d\n", philo->last_eat,
-//	*philo->last_eat);
+// 	*philo->last_eat);
 // pthread_mutex_unlock(&data->mutex_for_print);
 // pthread_mutex_lock(&data->mutex_for_print);
 // ft_printf("DEBUG: current_time = %d, last_eat = %d, diff = %d,
-//	time_before_dead = %d\n",
+// 	time_before_dead = %d\n",
 // get_current_time(), *philo->last_eat, get_current_time() - *philo->last_eat,
-//	philo->time_before_dead);
+// 	philo->time_before_dead);
 // pthread_mutex_unlock(&data->mutex_for_print);

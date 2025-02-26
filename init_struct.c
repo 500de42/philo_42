@@ -6,7 +6,7 @@
 /*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:45:38 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/23 19:42:42 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/02/26 20:03:07 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,11 +83,13 @@ int	init_data(t_data **data, char **av)
 	}
 	(*data)->starting_time = 0;
 	(*data)->count_meal = 0;
+	(*data)->finish = 0;
 	(*data)->nb_philo = ft_atoi(av[1]);
 	(*data)->time_to_dead = ft_atoi(av[2]);
 	(*data)->time_to_sleep = ft_atoi(av[4]);
 	(*data)->time_to_eat = ft_atoi(av[3]);
 	(*data)->philo_dead = false;
+	pthread_mutex_init(&(*data)->mutex_finish, NULL);
 	pthread_mutex_init(&(*data)->mutex_for_print, NULL);
 	pthread_mutex_init(&(*data)->last_eat_mutex, NULL);
 	pthread_mutex_init(&(*data)->mutex_for_count_meal, NULL);

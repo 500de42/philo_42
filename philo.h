@@ -17,12 +17,14 @@ typedef struct s_data
 	int				time_to_sleep;
 	int				nb_philo;
 	int				count_meal;
+	int				finish;
 	bool 			philo_dead;
 	size_t			starting_time;
 	pthread_mutex_t	mutex_for_dead;
 	pthread_mutex_t	mutex_for_print;
 	pthread_mutex_t	last_eat_mutex;
 	pthread_mutex_t	mutex_for_count_meal;
+	pthread_mutex_t	mutex_finish;
 }					t_data;
 
 typedef struct s_philo
