@@ -15,15 +15,15 @@
 
 #include "philo.h"
 
+void	ft_free_array(char **tab);
+
 int	main(int ac, char **av)
 {
 	t_data *data;
-	size_t time_;
 	t_philo	**philo_list;
-	
+
 	check_arg(av, ac);
-	time_ = get_current_time();
-	init_data(&data, time_, av);
+	init_data(&data, av);
 	init_philo(av, ac, &philo_list, data);
 	create_thread(philo_list, data);
 	loop_for_wait_philo(philo_list, data);

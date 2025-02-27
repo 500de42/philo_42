@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_struct.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:45:38 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/18 18:48:10 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/02/26 20:03:07 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ void	init_val_philo(t_philo *tmp, char **av, int i, int ac)
 	else
 		tmp->nb_eat = 0;
 	tmp->count_eat = 0;
-	tmp->ms_eat = 0;
 	tmp->time_before_dead = ft_atoi(av[2]);
 	tmp->time_to_eat = ft_atoi(av[3]);
 	tmp->time_to_sleep = ft_atoi(av[4]);
@@ -37,8 +36,9 @@ void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
 	*philo_list = malloc(sizeof(t_philo *) * (ft_atoi(av[1]) + 1));
 	if (!*philo_list)
 	{
+		ft_printf("erreur malloc philo_list");
 		// fonction qui free tout
-		return ;
+		exit(1) ;
 	}
 	while (++i < data->nb_philo)
 	{
@@ -50,8 +50,13 @@ void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
 			exit(1);
 		}
 		(*philo_list)[i]->d = data;
-		(*philo_list)[i]->last_eat = data->starting_time;
-		// ft_printf("\n\n%d\n\n%d\n\n", data->starting_time, (*philo_list)[i]->last_eat);
+		(*philo_list)[i]->last_eat = malloc(sizeof (size_t));
+		if (!((*philo_list)[i]->last_eat))
+		{
+			ft_printf("erreur malloc variable last_eat");
+			exit(1);
+		}
+		*(*philo_list)[i]->last_eat = data->starting_time;
 		init_val_philo((*philo_list)[i], av, i, ac);
 	}
 	(*philo_list)[i] = NULL;
@@ -68,17 +73,26 @@ void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
 	}
 }
 
-int	init_data(t_data **data, size_t time_, char **av)
+int	init_data(t_data **data, char **av)
 {
 	*data = malloc(sizeof(t_data));
 	if (!(*data))
+	{
+		ft_printf("erreur alloc data");
 		return (1);
-	(*data)->starting_time = time_;
+	}
+	(*data)->starting_time = 0;
+	(*data)->count_meal = 0;
+	(*data)->finish = 0;
 	(*data)->nb_philo = ft_atoi(av[1]);
 	(*data)->time_to_dead = ft_atoi(av[2]);
 	(*data)->time_to_sleep = ft_atoi(av[4]);
 	(*data)->time_to_eat = ft_atoi(av[3]);
+	(*data)->philo_dead = false;
+	pthread_mutex_init(&(*data)->mutex_finish, NULL);
 	pthread_mutex_init(&(*data)->mutex_for_print, NULL);
 	pthread_mutex_init(&(*data)->last_eat_mutex, NULL);
+	pthread_mutex_init(&(*data)->mutex_for_count_meal, NULL);
+	pthread_mutex_init(&(*data)->mutex_for_dead, NULL);
 	return (0);
 }

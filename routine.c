@@ -6,89 +6,166 @@
 /*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 21:01:09 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/18 19:06:10 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/02/27 23:58:14 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	*routine(void *random)
+int	only_one_philo(t_philo *p)
 {
-	t_philo	*p;
-	int nb_eat;
+	if (p->d->nb_philo == 1)
+	{
+		pthread_mutex_lock(&p->left_fork);
+		pthread_mutex_lock(&p->d->mutex_for_print);
+		ft_printf("%d philo %d has taken left fork\n", get_time_programme(p->d),
+			p->id_philo);
+		pthread_mutex_unlock(&p->d->mutex_for_print);
+		usleep(p->time_before_dead * 1000);
+		pthread_mutex_lock(&p->d->mutex_for_print);
+		ft_printf("%d philo %d is dead\n", get_time_programme(p->d),
+			p->id_philo);
+		pthread_mutex_unlock(&p->d->mutex_for_print);
+		pthread_mutex_unlock(&p->left_fork);
+		return (1);
+	}
+	return (0);
+}
 
-	p = (t_philo *)random;
-	nb_eat = 0;
-	if (p->i % 2 == 0)
-		usleep(p->time_to_eat / 10);
-	while (1)
-	{		
-		if (p->philo_dead == 1)
+int	take_fork(t_philo *p)
+{
+	pthread_mutex_lock(&p->d->mutex_for_dead);
+	if (!p->d->philo_dead)
+	{
+		pthread_mutex_unlock(&p->d->mutex_for_dead);
+		if ((p->id_philo % 2) == 0)
 		{
-			ft_printf("philo %d est mort\n", p->id_philo);
-			exit(1);
-			// fonction qui clear tout
+			pthread_mutex_lock(&p->left_fork);
+			pthread_mutex_lock(p->right_fork);
+			safe_print("has taken left fork", p);
+			safe_print("has taken right fork", p);
 		}
-		if (p->nb_eat > 0)
-			if (nb_eat == p->nb_eat)
-				{		
+		else
+		{
+			pthread_mutex_lock(p->right_fork);
+			pthread_mutex_lock(&p->left_fork);
+			safe_print("has taken right fork", p);
+			safe_print("has taken left fork", p);
+		}
+	}
+	else
+	{
+		pthread_mutex_unlock(&p->d->mutex_for_dead);
+		return (1);
+	}
+	return (0);
+}
+
+int	check_meal(t_philo *p, t_data *data)
+{
+	if (p->nb_eat > 0)
+	{
+		if (p->count_eat == p->nb_eat)
+		{
+			pthread_mutex_lock(&data->mutex_for_dead);
+			if (!data->philo_dead)
+			{
+				pthread_mutex_lock(&p->d->mutex_for_count_meal);
+				pthread_mutex_lock(&data->mutex_finish);
+				if (data->count_meal == p->nb_eat)
+				{
+					data->finish = 1;
 					pthread_mutex_lock(&p->d->mutex_for_print);
 					ft_printf("simulation fini\n");
 					pthread_mutex_unlock(&p->d->mutex_for_print);
-					exit(0);
 				}
-		pthread_mutex_lock(&p->d->mutex_for_print);
-		ft_printf("philo %d mange\n", p->id_philo);
-		pthread_mutex_unlock(&p->d->mutex_for_print);
-		pthread_mutex_lock(&p->left_fork);
-		pthread_mutex_lock(p->right_fork);
-		pthread_mutex_lock(&p->d->last_eat_mutex);
-		p->last_eat = get_current_time();
-		pthread_mutex_unlock(&p->d->last_eat_mutex);
-		usleep(p->time_to_eat);
-		pthread_mutex_unlock(&p->left_fork);
-		pthread_mutex_unlock(p->right_fork);
-		pthread_mutex_lock(&p->d->mutex_for_print);
-		ft_printf("philo %d dors\n", p->id_philo);
-		pthread_mutex_unlock(&p->d->mutex_for_print);
-		usleep(p->time_to_sleep);
-		pthread_mutex_lock(&p->d->mutex_for_print);
-		ft_printf("philo %d pense\n", p->id_philo);
-		pthread_mutex_unlock(&p->d->mutex_for_print);
-		nb_eat++;
+				pthread_mutex_unlock(&data->mutex_finish);
+				pthread_mutex_unlock(&p->d->mutex_for_count_meal);
+			}
+			pthread_mutex_unlock(&p->d->mutex_for_dead);
+			return (1);
+		}
+		return (0);
 	}
-	return (NULL);
+	return (0);
 }
 
-void	*routine_thread(void *random)
+int	routine_philo(t_philo *p)
 {
-	int		i;
-	t_philo	**philo_list;
-	t_data	*data;
+	pthread_mutex_lock(&p->d->last_eat_mutex);
+	*p->last_eat = get_current_time();
+	pthread_mutex_unlock(&p->d->last_eat_mutex);
+	if (safe_print("is eating", p) == 0)
+	{
+		p->count_eat++;
+		usleep(p->time_to_eat * 1000);
+	}
+	pthread_mutex_lock(&p->d->mutex_for_dead);
+	if (p->d->philo_dead)
+	{
+		let_go_forks(p);
+		pthread_mutex_unlock(&p->d->mutex_for_dead);
+		return (1);
+	}
+	pthread_mutex_unlock(&p->d->mutex_for_dead);
+	let_go_forks(p);
+	if (safe_print("is sleeping", p) == 0)
+		usleep(p->time_to_sleep * 1000);
+	if (safe_print("is thinking", p) == 1)
+		return (1);
+	else if (safe_print("is thinking", p) == 2)
+		return (2);
+	return (0);
+}
 
-	philo_list = (t_philo **)random;
-	data = philo_list[0]->d;
+void	*routine(void *random)
+{
+	t_philo	*p;
+
+	p = (t_philo *)random;
+	if ((p->id_philo % 2) == 0)
+		usleep(p->time_before_dead);
+	pthread_mutex_lock(&p->d->last_eat_mutex);
+	*p->last_eat = get_current_time();
+	pthread_mutex_unlock(&p->d->last_eat_mutex);
+	if (only_one_philo(p))
+		return (NULL);
+	pthread_create(&p->thread_eat, NULL, verif_dead, (void *)p);
 	while (1)
 	{
-		i = 0;
-		while (i < data->nb_philo)
-		{	
-			// pthread_mutex_lock(&philo_list[i]->d->mutex_for_print);
-			// ft_printf("nb philo%d\n%d", philo_list[i]->d->nb_philo, i);
-			// pthread_mutex_unlock(&philo_list[i]->d->mutex_for_print);
-			if (get_dead_time(data, i, philo_list))
-			{
-				pthread_mutex_lock(&data->mutex_for_print);
-				ft_printf("the philo %d is dead\n",
-					philo_list[i]->id_philo);
-				pthread_mutex_unlock(&data->mutex_for_print);
-				philo_list[i]->philo_dead = 1;
-				exit(1);
-				// fonction qui stop tout et clear
-			}
-			i++;
+		if (check_meal(p, p->d))
+			return (NULL);
+		pthread_mutex_lock(&p->d->mutex_for_dead);
+		if (p->d->philo_dead)
+		{
+			pthread_mutex_unlock(&p->d->mutex_for_dead);
+			return (NULL);
 		}
-		
+		pthread_mutex_unlock(&p->d->mutex_for_dead);		
+		// pthread_mutex_lock(&p->d->mutex_for_print);
+		// ft_printf("test\n");
+		// pthread_mutex_unlock(&p->d->mutex_for_print);
+		if (take_fork(p))
+			return (NULL);
+
+		if (routine_philo(p) == 1)
+			return (NULL);
+
+		pthread_mutex_lock(&p->d->mutex_for_count_meal);
+		if (p->count_eat == p->nb_eat)
+			p->d->count_meal++;
+		pthread_mutex_unlock(&p->d->mutex_for_count_meal);
 	}
 	return (NULL);
 }
+
+// ft_printf("DEBUG: last_eat address = %p, value = %d\n", p->last_eat,
+// 	*p->last_eat);
+// pthread_mutex_unlock(&p->d->mutex_for_print);
+// pthread_mutex_lock(&p->d->mutex_for_print);
+// ft_printf("DEBUG: current_time = %d, last_eat = %d, diff =
+// 	%d,time_before_dead = %d\n",
+// // 	get_current_time(), *p->last_eat, get_current_time()
+// 		- *p->last_eat,p->time_before_dead);
+// pthread_mutex_unlock(&p->d->mutex_for_print);
+// // pthread_create(&p->thread_eat, NULL, verif_dead, p);

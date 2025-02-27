@@ -1,4 +1,4 @@
-OBJS = main.o error.o utils.o init_struct.o routine.o parsing.o
+OBJS = main.o error.o utils.o init_struct.o routine.o utils2.o parsing.o
 SRCS = $(OBJS:.o=.c)
 NAME = philo
 GFLAGS = -Wall -Werror -Wextra -g3
