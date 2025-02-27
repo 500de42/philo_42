@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:01:58 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/26 18:12:44 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/02/28 00:00:21 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,13 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 		{
 			ft_putstr_fd("error pthread_join", 2);
 		}
+		if(data->nb_philo > 1)
+		{
+			if (pthread_join(philo[i]->thread_eat, NULL))
+			{
+				ft_putstr_fd("error pthread_join", 2);
+			}
+		}
 		i++;
 	}
 	if (data->count_meal == philo[0]->nb_eat)
@@ -58,6 +65,9 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 			pthread_mutex_destroy(&philo[i]->left_fork);
 			free(philo[i]);
 		}
+		// free(philo[i]->last_eat);
+		// pthread_mutex_destroy(&philo[i]->left_fork);
+		free(philo[i]);
 		free(data);
 		free(philo);
 	}

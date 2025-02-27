@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils2.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 18:15:06 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/26 19:59:56 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/02/27 23:55:21 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,25 +54,56 @@ void	ft_usleep(long int time_in_ms)
 // 	return (NULL);
 // }
 
+// void	*verif_dead(void *random)
+// {
+// 	t_philo	*philo;
+// 	t_data	*data;
+// 	size_t	last_eat_copy;
+
+// 	philo = (t_philo *)random;
+// 	data = philo->d;
+// 	while (1) 
+// 	{
+// 		pthread_mutex_lock(&data->last_eat_mutex);
+// 		last_eat_copy = *philo->last_eat;
+// 		pthread_mutex_unlock(&data->last_eat_mutex);
+// 		if ((get_current_time() - last_eat_copy) >= (size_t)philo->time_before_dead)
+// 		{
+// 			pthread_mutex_lock(&data->mutex_for_dead);
+// 			if (data->philo_dead)
+// 			{
+// 				pthread_mutex_unlock(&data->mutex_for_dead);
+// 				return (NULL);
+// 			}
+// 			data->philo_dead = true;
+// 			pthread_mutex_unlock(&data->mutex_for_dead);
+// 			pthread_mutex_lock(&data->mutex_for_print);
+// 			ft_printf("%d the philo %d died\n", get_time_programme(data), philo->id_philo);
+// 			pthread_mutex_unlock(&data->mutex_for_print);
+// 			return (NULL);
+// 		}
+// 		ft_usleep(500);
+// 	}
+// 	return (NULL);
+// }
+
 void	*verif_dead(void *random)
 {
 	t_philo	*philo;
 	t_data	*data;
-	size_t	last_eat;
 
 	philo = (t_philo *)random;
 	data = philo->d;
 	while (1)
 	{
 		pthread_mutex_lock(&data->last_eat_mutex);
-		last_eat = *philo->last_eat;
-		pthread_mutex_unlock(&data->last_eat_mutex);
-		if ((get_current_time() - last_eat) >= (size_t)philo->time_before_dead)
+		if ((get_current_time() - *philo->last_eat) >= (size_t)philo->time_before_dead)
 		{
 			pthread_mutex_lock(&data->mutex_for_dead);
 			if (data->philo_dead)
 			{
 				pthread_mutex_unlock(&data->mutex_for_dead);
+				pthread_mutex_unlock(&data->last_eat_mutex);
 				return (NULL);
 			}
 			data->philo_dead = true;
@@ -81,9 +112,15 @@ void	*verif_dead(void *random)
 			ft_printf("%d the philo %d died\n", get_time_programme(data),
 				philo->id_philo);
 			pthread_mutex_unlock(&data->mutex_for_print);
+			pthread_mutex_unlock(&data->last_eat_mutex);
 			return (NULL);
 		}
-		usleep(500 * 1000);
+		pthread_mutex_unlock(&data->last_eat_mutex);
+		usleep(500);
+		// pthread_mutex_lock(&data->mutex_for_dead);
+		// if (!data->philo_dead)
+		// 	usleep(500);
+		// pthread_mutex_unlock(&data->mutex_for_dead);
 	}
 	return (NULL);
 }
@@ -96,7 +133,7 @@ int	safe_print(char *str, t_philo *ph)
 	data = ph->d;
 	pthread_mutex_lock(&data->mutex_for_dead);
 	pthread_mutex_lock(&data->mutex_finish);
-	if (data->philo_dead == true || ph->count_eat == ph->nb_eat
+	if (data->philo_dead == true ||(( ph->count_eat == ph->nb_eat) && (ph->nb_eat > 0))
 		|| data->finish == 1)
 	{
 		pthread_mutex_unlock(&data->mutex_for_dead);
