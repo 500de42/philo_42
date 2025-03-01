@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_struct.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:45:38 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/26 20:03:07 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/03/01 01:35:01 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,19 +56,24 @@ void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
 			ft_printf("erreur malloc variable last_eat");
 			exit(1);
 		}
-		*(*philo_list)[i]->last_eat = data->starting_time;
 		init_val_philo((*philo_list)[i], av, i, ac);
 	}
 	(*philo_list)[i] = NULL;
 	i = -1;
-	while ((*philo_list)[++i])
+	while (++i < data->nb_philo)
 	{
 		if (ft_atoi(av[1]) > 1)
 		{
 			if (i == 0)
-				(*philo_list)[i]->right_fork = &(*philo_list)[ft_atoi(av[1]) - 1]->left_fork;
+				{
+					(*philo_list)[i]->right_fork = &(*philo_list)[ft_atoi(av[1]) - 1]->left_fork;
+					(*philo_list)[i]->id_fork = (*philo_list)[ft_atoi(av[1]) - 1]->id_philo;
+				}
 			else
-				(*philo_list)[i]->right_fork = &(*philo_list)[i - 1]->left_fork;
+				{
+					(*philo_list)[i]->right_fork = &(*philo_list)[i - 1]->left_fork;
+					(*philo_list)[i]->id_fork = (*philo_list)[i - 1]->id_philo;
+				}
 		}
 	}
 }
@@ -90,6 +95,7 @@ int	init_data(t_data **data, char **av)
 	(*data)->time_to_eat = ft_atoi(av[3]);
 	(*data)->philo_dead = false;
 	pthread_mutex_init(&(*data)->mutex_finish, NULL);
+	pthread_mutex_init(&(*data)->mutex_for_time, NULL);
 	pthread_mutex_init(&(*data)->mutex_for_print, NULL);
 	pthread_mutex_init(&(*data)->last_eat_mutex, NULL);
 	pthread_mutex_init(&(*data)->mutex_for_count_meal, NULL);

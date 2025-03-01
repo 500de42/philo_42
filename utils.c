@@ -6,7 +6,7 @@
 /*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:01:58 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/28 00:00:21 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/03/01 20:38:17 by kalvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,30 +47,27 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 		{
 			if (pthread_join(philo[i]->thread_eat, NULL))
 			{
-				ft_putstr_fd("error pthread_join", 2);
+				ft_putstr_fd("error pthread_join2", 2);
 			}
 		}
 		i++;
 	}
-	if (data->count_meal == philo[0]->nb_eat)
+	pthread_mutex_destroy(&data->mutex_for_print);
+	pthread_mutex_destroy(&data->mutex_for_count_meal);
+	pthread_mutex_destroy(&data->mutex_for_dead);
+	pthread_mutex_destroy(&data->last_eat_mutex);
+	i = -1;
+	while (++i < data->nb_philo)
 	{
-		pthread_mutex_destroy(&data->mutex_for_print);
-		pthread_mutex_destroy(&data->mutex_for_count_meal);
-		pthread_mutex_destroy(&data->mutex_for_dead);
-		pthread_mutex_destroy(&data->last_eat_mutex);
-		i = -1;
-		while (++i < data->nb_philo)
-		{
-			free(philo[i]->last_eat);
-			pthread_mutex_destroy(&philo[i]->left_fork);
-			free(philo[i]);
-		}
-		// free(philo[i]->last_eat);
-		// pthread_mutex_destroy(&philo[i]->left_fork);
+		free(philo[i]->last_eat);
+		pthread_mutex_destroy(&philo[i]->left_fork);
 		free(philo[i]);
-		free(data);
-		free(philo);
 	}
+	// free(philo[i]->last_eat);
+	// pthread_mutex_destroy(&philo[i]->left_fork);
+	free(philo[i]);
+	free(data);
+	free(philo);
 	return ;
 }
 
@@ -95,6 +92,7 @@ int	get_dead_time(t_data *data, t_philo *philo_list)
 	pthread_mutex_lock(&data->last_eat_mutex);
 	is_dead = get_current_time() - *philo_list->last_eat;
 	pthread_mutex_unlock(&data->last_eat_mutex);
+	pthread_mutex_lock(&data->mutex_for_time);
 	if (is_dead >= (size_t)data->time_to_dead)
 		return (1);
 	return (0);
