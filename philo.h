@@ -39,6 +39,7 @@ typedef struct s_philo
 	int				time_to_sleep;
 	int				count_eat;
 	int 			nb_eat;
+	int				nb_philo;
 	pthread_t		philo;
 	pthread_t		thread_eat;
 	size_t			*last_eat;

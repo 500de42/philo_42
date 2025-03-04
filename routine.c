@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routine.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 21:01:09 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/03/01 22:07:18 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/03/04 17:10:34 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,7 @@ int	only_one_philo(t_philo *p)
 		pthread_mutex_unlock(&p->d->mutex_for_print);
 		usleep(p->time_before_dead * 1000);
 		pthread_mutex_lock(&p->d->mutex_for_print);
-		ft_printf("%d philo %d died\n", get_time_programme(p->d),
-			p->id_philo);
+		ft_printf("%d philo %d died\n", get_time_programme(p->d), p->id_philo);
 		pthread_mutex_unlock(&p->d->mutex_for_print);
 		pthread_mutex_unlock(&p->left_fork);
 		return (1);
@@ -49,8 +48,8 @@ int	take_fork(t_philo *p)
 		safe_print("has taken left fork", p);
 	}
 	else
-	{	
-		pthread_mutex_lock(&p->left_fork);	
+	{
+		pthread_mutex_lock(&p->left_fork);
 		pthread_mutex_lock(p->right_fork);
 		safe_print("has taken left fork", p);
 		safe_print("has taken right fork", p);
@@ -76,15 +75,19 @@ int	check_meal(t_philo *p, t_data *data)
 			if (!data->philo_dead)
 			{
 				pthread_mutex_lock(&p->d->mutex_for_count_meal);
-				pthread_mutex_lock(&data->mutex_finish);
-				if (data->count_meal == p->nb_eat)
+				pthread_mutex_lock(&p->d->mutex_for_print);
+				ft_printf("le philo %d a manger %d, count meal %d\n",
+					p->id_philo, p->count_eat, data->count_meal);
+				pthread_mutex_unlock(&p->d->mutex_for_print);
+				if (data->count_meal == p->nb_philo)
 				{
+					pthread_mutex_lock(&data->mutex_finish);
 					data->finish = 1;
+					pthread_mutex_unlock(&data->mutex_finish);
 					pthread_mutex_lock(&p->d->mutex_for_print);
 					ft_printf("simulation fini\n");
 					pthread_mutex_unlock(&p->d->mutex_for_print);
 				}
-				pthread_mutex_unlock(&data->mutex_finish);
 				pthread_mutex_unlock(&p->d->mutex_for_count_meal);
 			}
 			pthread_mutex_unlock(&p->d->mutex_for_dead);
@@ -132,7 +135,7 @@ int	routine_philo(t_philo *p)
 	if (safe_print("is sleeping", p) == 0)
 		if (smart_sleep(p, p->time_to_sleep))
 			return (1);
-	return(safe_print("is thinking", p));
+	return (safe_print("is thinking", p));
 }
 
 void	*routine(void *random)
@@ -141,7 +144,8 @@ void	*routine(void *random)
 
 	p = (t_philo *)random;
 	// pthread_mutex_lock(&p->d->mutex_for_print);
-	// ft_printf("nb eat %d, count eat %d, id_philo %d, id_fork %d\n", p->nb_eat, p->count_eat, p->id_philo, p->id_fork);
+	// ft_printf("nb eat %d, count eat %d, id_philo %d, id_fork %d\n",
+	//	p->nb_eat, p->count_eat, p->id_philo, p->id_fork);
 	// pthread_mutex_unlock(&p->d->mutex_for_print);
 	if (only_one_philo(p))
 		return (NULL);
@@ -154,7 +158,7 @@ void	*routine(void *random)
 	while (1)
 	{
 		if (check_meal(p, p->d))
-			return (NULL);	
+			return (NULL);
 		if (take_fork(p))
 			return (NULL);
 		if (routine_philo(p) == 1)

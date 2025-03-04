@@ -3,22 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   init_struct.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:45:38 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/03/01 01:35:01 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/03/04 17:08:54 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
 void	init_val_philo(t_philo *tmp, char **av, int i, int ac)
-{	
+{
 	tmp->id_philo = i + 1;
 	if (ac == 6)
 		tmp->nb_eat = ft_atoi(av[5]);
 	else
 		tmp->nb_eat = 0;
+	tmp->nb_philo = ft_atoi(av[1]);
 	tmp->count_eat = 0;
 	tmp->time_before_dead = ft_atoi(av[2]);
 	tmp->time_to_eat = ft_atoi(av[3]);
@@ -38,7 +39,7 @@ void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
 	{
 		ft_printf("erreur malloc philo_list");
 		// fonction qui free tout
-		exit(1) ;
+		exit(1);
 	}
 	while (++i < data->nb_philo)
 	{
@@ -50,7 +51,7 @@ void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
 			exit(1);
 		}
 		(*philo_list)[i]->d = data;
-		(*philo_list)[i]->last_eat = malloc(sizeof (size_t));
+		(*philo_list)[i]->last_eat = malloc(sizeof(size_t));
 		if (!((*philo_list)[i]->last_eat))
 		{
 			ft_printf("erreur malloc variable last_eat");
@@ -65,15 +66,17 @@ void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
 		if (ft_atoi(av[1]) > 1)
 		{
 			if (i == 0)
-				{
-					(*philo_list)[i]->right_fork = &(*philo_list)[ft_atoi(av[1]) - 1]->left_fork;
-					(*philo_list)[i]->id_fork = (*philo_list)[ft_atoi(av[1]) - 1]->id_philo;
-				}
+			{
+				(*philo_list)[i]->right_fork = &(*philo_list)[ft_atoi(av[1])
+					- 1]->left_fork;
+				(*philo_list)[i]->id_fork = (*philo_list)[ft_atoi(av[1])
+					- 1]->id_philo;
+			}
 			else
-				{
-					(*philo_list)[i]->right_fork = &(*philo_list)[i - 1]->left_fork;
-					(*philo_list)[i]->id_fork = (*philo_list)[i - 1]->id_philo;
-				}
+			{
+				(*philo_list)[i]->right_fork = &(*philo_list)[i - 1]->left_fork;
+				(*philo_list)[i]->id_fork = (*philo_list)[i - 1]->id_philo;
+			}
 		}
 	}
 }
