@@ -20,6 +20,7 @@ typedef struct s_data
 	int				finish;
 	bool 			philo_dead;
 	size_t			starting_time;
+	pthread_mutex_t mutex_finish_eat;
 	pthread_mutex_t	mutex_for_time;	
 	pthread_mutex_t	mutex_for_dead;
 	pthread_mutex_t	mutex_for_print;
@@ -40,6 +41,7 @@ typedef struct s_philo
 	int				count_eat;
 	int 			nb_eat;
 	int				nb_philo;
+	int				finish_eat;
 	pthread_t		philo;
 	pthread_t		thread_eat;
 	size_t			*last_eat;

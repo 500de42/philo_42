@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils2.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 18:15:06 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/03/01 22:15:12 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/03/04 19:40:31 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,16 +31,38 @@ void	*verif_dead(void *random)
 	data = philo->d;
 	while (1)
 	{
+		pthread_mutex_lock(&data->mutex_finish_eat);
+		if (philo->finish_eat)
+		{
+			pthread_mutex_unlock(&data->mutex_finish_eat);
+			return (NULL);
+		}
+		pthread_mutex_unlock(&data->mutex_finish_eat);
 		pthread_mutex_lock(&data->last_eat_mutex);
 		if ((get_current_time() - *philo->last_eat) >= (size_t)philo->time_before_dead)
 		{
 			pthread_mutex_unlock(&data->last_eat_mutex);
+			pthread_mutex_lock(&data->mutex_finish_eat);
+			if (philo->finish_eat)
+			{
+				pthread_mutex_unlock(&data->mutex_finish_eat);
+				return (NULL);
+			}
+			pthread_mutex_unlock(&data->mutex_finish_eat);
 			pthread_mutex_lock(&data->mutex_for_dead);
 			if (data->philo_dead)
 			{
 				pthread_mutex_unlock(&data->mutex_for_dead);
 				return (NULL);
 			}
+			pthread_mutex_lock(&data->mutex_finish_eat);
+			if (philo->finish_eat)
+			{
+				pthread_mutex_unlock(&data->mutex_for_dead);
+				pthread_mutex_unlock(&data->mutex_finish_eat);
+				return (NULL);
+			}
+			pthread_mutex_unlock(&data->mutex_finish_eat);
 			data->philo_dead = true;
 			pthread_mutex_unlock(&data->mutex_for_dead);
 			// pthread_mutex_lock(&data->mutex_for_print);
@@ -99,10 +121,10 @@ int	safe_print(char *str, t_philo *ph)
 
 void	let_go_forks(t_philo *p)
 {
-	if (p->id_philo < p->id_fork)
-	{		
+	if (p->id_philo % 2 == 0)
+	{
 		pthread_mutex_unlock(&p->left_fork);
-		pthread_mutex_unlock(p->right_fork);	
+		pthread_mutex_unlock(p->right_fork);
 	}
 	else
 	{

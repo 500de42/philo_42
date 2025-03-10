@@ -6,7 +6,7 @@
 /*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 21:01:09 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/03/04 17:10:34 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/03/10 16:19:10 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,19 +40,20 @@ int	take_fork(t_philo *p)
 		return (1);
 	}
 	pthread_mutex_unlock(&p->d->mutex_for_dead);
-	if (p->id_philo < p->id_fork)
+	if ((p->id_philo % 2) == 0)
 	{
 		pthread_mutex_lock(p->right_fork);
 		pthread_mutex_lock(&p->left_fork);
-		safe_print("has taken right fork", p);
 		safe_print("has taken left fork", p);
+		safe_print("has taken right fork", p);
 	}
 	else
-	{
+	{	
 		pthread_mutex_lock(&p->left_fork);
 		pthread_mutex_lock(p->right_fork);
-		safe_print("has taken left fork", p);
+
 		safe_print("has taken right fork", p);
+		safe_print("has taken left fork", p);
 	}
 	pthread_mutex_lock(&p->d->mutex_for_dead);
 	if (p->d->philo_dead)
@@ -74,6 +75,9 @@ int	check_meal(t_philo *p, t_data *data)
 			pthread_mutex_lock(&data->mutex_for_dead);
 			if (!data->philo_dead)
 			{
+				pthread_mutex_lock(&data->mutex_finish_eat);
+				p->finish_eat = 1;
+				pthread_mutex_unlock(&data->mutex_finish_eat);
 				pthread_mutex_lock(&p->d->mutex_for_count_meal);
 				pthread_mutex_lock(&p->d->mutex_for_print);
 				ft_printf("le philo %d a manger %d, count meal %d\n",
@@ -143,14 +147,22 @@ void	*routine(void *random)
 	t_philo	*p;
 
 	p = (t_philo *)random;
-	// pthread_mutex_lock(&p->d->mutex_for_print);
-	// ft_printf("nb eat %d, count eat %d, id_philo %d, id_fork %d\n",
-	//	p->nb_eat, p->count_eat, p->id_philo, p->id_fork);
-	// pthread_mutex_unlock(&p->d->mutex_for_print);
+	pthread_mutex_lock(&p->d->mutex_for_print);
+	ft_printf("nb eat %d, count eat %d, id_philo %d, id_fork %d\n",
+		p->nb_eat, p->count_eat, p->id_philo, p->id_fork);
+	pthread_mutex_unlock(&p->d->mutex_for_print);
 	if (only_one_philo(p))
 		return (NULL);
-	if ((p->id_philo % 2) == 0)
-		usleep(1000);
+	if (p->nb_philo > 30)
+	{
+		if ((p->id_philo % 2) == 0)
+			usleep(p->time_before_dead);
+	}
+	else
+	{
+		if ((p->id_philo % 2) == 0)
+			usleep(p->time_before_dead / 10);
+	}
 	pthread_mutex_lock(&p->d->last_eat_mutex);
 	*p->last_eat = get_current_time();
 	pthread_mutex_unlock(&p->d->last_eat_mutex);

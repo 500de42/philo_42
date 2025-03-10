@@ -1,3 +1,4 @@
-pb philo qui meurt  5 800 200 200
-
+pb philo qui meurt  5 800 200 200 test pour eval 
+4 410 200 200
+pb nb impair
 gerer les data races

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:01:58 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/03/01 20:38:17 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/03/10 16:30:03 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ void	create_thread(t_philo **philo, t_data *data)
 				(void *)philo[i]) != 0)
 		{
 			ft_putstr_fd("error creation pthread\n", 2);
-			// fonction qui clear tout
 			return ;
 		}
 	}
@@ -43,7 +42,7 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 		{
 			ft_putstr_fd("error pthread_join", 2);
 		}
-		if(data->nb_philo > 1)
+		if (data->nb_philo > 1)
 		{
 			if (pthread_join(philo[i]->thread_eat, NULL))
 			{
@@ -52,6 +51,8 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 		}
 		i++;
 	}
+	pthread_mutex_destroy(&data->mutex_finish);
+	pthread_mutex_destroy(&data->mutex_finish_eat);
 	pthread_mutex_destroy(&data->mutex_for_print);
 	pthread_mutex_destroy(&data->mutex_for_count_meal);
 	pthread_mutex_destroy(&data->mutex_for_dead);

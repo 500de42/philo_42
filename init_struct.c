@@ -6,7 +6,7 @@
 /*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:45:38 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/03/04 17:08:54 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/03/04 19:52:47 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ void	init_val_philo(t_philo *tmp, char **av, int i, int ac)
 	tmp->time_to_sleep = ft_atoi(av[4]);
 	tmp->i = i;
 	tmp->philo_dead = 0;
+	tmp->finish_eat = 0;
 	pthread_mutex_init(&tmp->left_fork, NULL);
 }
 
@@ -97,6 +98,7 @@ int	init_data(t_data **data, char **av)
 	(*data)->time_to_sleep = ft_atoi(av[4]);
 	(*data)->time_to_eat = ft_atoi(av[3]);
 	(*data)->philo_dead = false;
+	pthread_mutex_init(&(*data)->mutex_finish_eat, NULL);
 	pthread_mutex_init(&(*data)->mutex_finish, NULL);
 	pthread_mutex_init(&(*data)->mutex_for_time, NULL);
 	pthread_mutex_init(&(*data)->mutex_for_print, NULL);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kalvin <kalvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/08 19:46:19 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/02/18 20:48:07 by kalvin           ###   ########.fr       */
+/*   Updated: 2025/03/10 16:28:06 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 static void	check_before_loop(char **av, int i, int ac)
 {
-	if ((ac < 5) || (ac > 6))
+	if (((ac < 5) || (ac > 6)))
 	{
 		ft_putstr_fd("the number of arguments must be 4 or 5\n", 2);
 		exit(1);
