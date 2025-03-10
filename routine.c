@@ -6,7 +6,7 @@
 /*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 21:01:09 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/03/10 16:19:10 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/03/10 19:14:01 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,10 +48,9 @@ int	take_fork(t_philo *p)
 		safe_print("has taken right fork", p);
 	}
 	else
-	{	
+	{
 		pthread_mutex_lock(&p->left_fork);
 		pthread_mutex_lock(p->right_fork);
-
 		safe_print("has taken right fork", p);
 		safe_print("has taken left fork", p);
 	}
@@ -147,10 +146,6 @@ void	*routine(void *random)
 	t_philo	*p;
 
 	p = (t_philo *)random;
-	pthread_mutex_lock(&p->d->mutex_for_print);
-	ft_printf("nb eat %d, count eat %d, id_philo %d, id_fork %d\n",
-		p->nb_eat, p->count_eat, p->id_philo, p->id_fork);
-	pthread_mutex_unlock(&p->d->mutex_for_print);
 	if (only_one_philo(p))
 		return (NULL);
 	if (p->nb_philo > 30)
@@ -169,6 +164,9 @@ void	*routine(void *random)
 	pthread_create(&p->thread_eat, NULL, verif_dead, (void *)p);
 	while (1)
 	{
+		if (p->nb_philo % 2 && p->count_eat)
+			smart_sleep(p, (p->time_before_dead - (p->time_to_eat
+						+ p->time_to_sleep)) * 0.5);
 		if (check_meal(p, p->d))
 			return (NULL);
 		if (take_fork(p))
