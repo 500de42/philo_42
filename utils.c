@@ -6,7 +6,7 @@
 /*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:01:58 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/03/10 16:30:03 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/03/11 17:35:50 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,16 @@ void	create_thread(t_philo **philo, t_data *data)
 	}
 }
 
+void	destroy_data(t_data *data)
+{
+	pthread_mutex_destroy(&data->mutex_finish);
+	pthread_mutex_destroy(&data->mutex_finish_eat);
+	pthread_mutex_destroy(&data->mutex_for_print);
+	pthread_mutex_destroy(&data->mutex_for_count_meal);
+	pthread_mutex_destroy(&data->mutex_for_dead);
+	pthread_mutex_destroy(&data->last_eat_mutex);
+}
+
 void	loop_for_wait_philo(t_philo **philo, t_data *data)
 {
 	int	i;
@@ -39,24 +49,13 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 	while (i < data->nb_philo)
 	{
 		if (pthread_join(philo[i]->philo, NULL))
-		{
 			ft_putstr_fd("error pthread_join", 2);
-		}
 		if (data->nb_philo > 1)
-		{
 			if (pthread_join(philo[i]->thread_eat, NULL))
-			{
 				ft_putstr_fd("error pthread_join2", 2);
-			}
-		}
 		i++;
 	}
-	pthread_mutex_destroy(&data->mutex_finish);
-	pthread_mutex_destroy(&data->mutex_finish_eat);
-	pthread_mutex_destroy(&data->mutex_for_print);
-	pthread_mutex_destroy(&data->mutex_for_count_meal);
-	pthread_mutex_destroy(&data->mutex_for_dead);
-	pthread_mutex_destroy(&data->last_eat_mutex);
+	destroy_data(data);
 	i = -1;
 	while (++i < data->nb_philo)
 	{
@@ -64,21 +63,10 @@ void	loop_for_wait_philo(t_philo **philo, t_data *data)
 		pthread_mutex_destroy(&philo[i]->left_fork);
 		free(philo[i]);
 	}
-	// free(philo[i]->last_eat);
-	// pthread_mutex_destroy(&philo[i]->left_fork);
 	free(philo[i]);
 	free(data);
 	free(philo);
 	return ;
-}
-
-size_t	get_current_time(void)
-{
-	struct timeval	time;
-
-	if (gettimeofday(&time, NULL) == -1)
-		write(2, "gettimeofday() error\n", 22);
-	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
 size_t	get_time_programme(t_data *data)

@@ -19,8 +19,8 @@ void	ft_free_array(char **tab);
 
 int	main(int ac, char **av)
 {
-	t_data *data;
-	t_philo **philo_list;
+	t_data	*data;
+	t_philo	**philo_list;
 
 	if (ac == 1)
 		return (1);

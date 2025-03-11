@@ -6,7 +6,7 @@
 /*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 18:45:38 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/03/04 19:52:47 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/03/11 16:45:04 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,37 +30,10 @@ void	init_val_philo(t_philo *tmp, char **av, int i, int ac)
 	pthread_mutex_init(&tmp->left_fork, NULL);
 }
 
-void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
+void	in(char **av, t_philo ***philo_list, t_data *data)
 {
 	int	i;
 
-	i = -1;
-	*philo_list = malloc(sizeof(t_philo *) * (ft_atoi(av[1]) + 1));
-	if (!*philo_list)
-	{
-		ft_printf("erreur malloc philo_list");
-		// fonction qui free tout
-		exit(1);
-	}
-	while (++i < data->nb_philo)
-	{
-		(*philo_list)[i] = malloc(sizeof(t_philo));
-		if (!(*philo_list)[i])
-		{
-			erreur_init_philo(*philo_list, i);
-			ft_putstr_fd("error initialisation", 2);
-			exit(1);
-		}
-		(*philo_list)[i]->d = data;
-		(*philo_list)[i]->last_eat = malloc(sizeof(size_t));
-		if (!((*philo_list)[i]->last_eat))
-		{
-			ft_printf("erreur malloc variable last_eat");
-			exit(1);
-		}
-		init_val_philo((*philo_list)[i], av, i, ac);
-	}
-	(*philo_list)[i] = NULL;
 	i = -1;
 	while (++i < data->nb_philo)
 	{
@@ -80,6 +53,46 @@ void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
 			}
 		}
 	}
+}
+
+void	free_(t_philo ***philo_list, int a, t_data *data, bool f)
+{
+	pthread_mutex_destroy(&data->mutex_finish);
+	pthread_mutex_destroy(&data->mutex_finish_eat);
+	pthread_mutex_destroy(&data->mutex_for_print);
+	pthread_mutex_destroy(&data->mutex_for_count_meal);
+	pthread_mutex_destroy(&data->mutex_for_dead);
+	pthread_mutex_destroy(&data->last_eat_mutex);
+	free(data);
+	if (f)
+	{
+		ft_putstr_fd("error initialisation", 2);
+		erreur_init_philo(*philo_list, a);
+	}
+	exit(1);
+}
+
+void	init_philo(char **av, int ac, t_philo ***philo_list, t_data *data)
+{
+	int	i;
+
+	i = -1;
+	*philo_list = malloc(sizeof(t_philo *) * (ft_atoi(av[1]) + 1));
+	if (!*philo_list)
+		free_(philo_list, 0, data, false);
+	while (++i < data->nb_philo)
+	{
+		(*philo_list)[i] = malloc(sizeof(t_philo));
+		if (!(*philo_list)[i])
+			free_(philo_list, i, data, true);
+		(*philo_list)[i]->d = data;
+		(*philo_list)[i]->last_eat = malloc(sizeof(size_t));
+		if (!((*philo_list)[i]->last_eat))
+			free_(philo_list, i, data, true);
+		init_val_philo((*philo_list)[i], av, i, ac);
+	}
+	(*philo_list)[i] = NULL;
+	in(av, philo_list, data);
 }
 
 int	init_data(t_data **data, char **av)

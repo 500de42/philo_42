@@ -6,7 +6,7 @@
 /*   By: kcharbon <kcharbon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 21:01:09 by kcharbon          #+#    #+#             */
-/*   Updated: 2025/03/10 19:14:01 by kcharbon         ###   ########.fr       */
+/*   Updated: 2025/03/11 17:36:50 by kcharbon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,29 +31,8 @@ int	only_one_philo(t_philo *p)
 	return (0);
 }
 
-int	take_fork(t_philo *p)
+int	forks(t_philo *p)
 {
-	pthread_mutex_lock(&p->d->mutex_for_dead);
-	if (p->d->philo_dead)
-	{
-		pthread_mutex_unlock(&p->d->mutex_for_dead);
-		return (1);
-	}
-	pthread_mutex_unlock(&p->d->mutex_for_dead);
-	if ((p->id_philo % 2) == 0)
-	{
-		pthread_mutex_lock(p->right_fork);
-		pthread_mutex_lock(&p->left_fork);
-		safe_print("has taken left fork", p);
-		safe_print("has taken right fork", p);
-	}
-	else
-	{
-		pthread_mutex_lock(&p->left_fork);
-		pthread_mutex_lock(p->right_fork);
-		safe_print("has taken right fork", p);
-		safe_print("has taken left fork", p);
-	}
 	pthread_mutex_lock(&p->d->mutex_for_dead);
 	if (p->d->philo_dead)
 	{
@@ -62,61 +41,6 @@ int	take_fork(t_philo *p)
 		return (1);
 	}
 	pthread_mutex_unlock(&p->d->mutex_for_dead);
-	return (0);
-}
-
-int	check_meal(t_philo *p, t_data *data)
-{
-	if (p->nb_eat > 0)
-	{
-		if (p->count_eat == p->nb_eat)
-		{
-			pthread_mutex_lock(&data->mutex_for_dead);
-			if (!data->philo_dead)
-			{
-				pthread_mutex_lock(&data->mutex_finish_eat);
-				p->finish_eat = 1;
-				pthread_mutex_unlock(&data->mutex_finish_eat);
-				pthread_mutex_lock(&p->d->mutex_for_count_meal);
-				pthread_mutex_lock(&p->d->mutex_for_print);
-				ft_printf("le philo %d a manger %d, count meal %d\n",
-					p->id_philo, p->count_eat, data->count_meal);
-				pthread_mutex_unlock(&p->d->mutex_for_print);
-				if (data->count_meal == p->nb_philo)
-				{
-					pthread_mutex_lock(&data->mutex_finish);
-					data->finish = 1;
-					pthread_mutex_unlock(&data->mutex_finish);
-					pthread_mutex_lock(&p->d->mutex_for_print);
-					ft_printf("simulation fini\n");
-					pthread_mutex_unlock(&p->d->mutex_for_print);
-				}
-				pthread_mutex_unlock(&p->d->mutex_for_count_meal);
-			}
-			pthread_mutex_unlock(&p->d->mutex_for_dead);
-			return (1);
-		}
-		return (0);
-	}
-	return (0);
-}
-
-int	smart_sleep(t_philo *p, size_t sleep_time)
-{
-	size_t	start_time;
-
-	start_time = get_current_time();
-	while ((get_current_time() - start_time) < sleep_time)
-	{
-		pthread_mutex_lock(&p->d->mutex_for_dead);
-		if (p->d->philo_dead)
-		{
-			pthread_mutex_unlock(&p->d->mutex_for_dead);
-			return (1);
-		}
-		pthread_mutex_unlock(&p->d->mutex_for_dead);
-		usleep(500);
-	}
 	return (0);
 }
 
@@ -141,13 +65,8 @@ int	routine_philo(t_philo *p)
 	return (safe_print("is thinking", p));
 }
 
-void	*routine(void *random)
+void	sleep_phi(t_philo *p)
 {
-	t_philo	*p;
-
-	p = (t_philo *)random;
-	if (only_one_philo(p))
-		return (NULL);
 	if (p->nb_philo > 30)
 	{
 		if ((p->id_philo % 2) == 0)
@@ -161,6 +80,16 @@ void	*routine(void *random)
 	pthread_mutex_lock(&p->d->last_eat_mutex);
 	*p->last_eat = get_current_time();
 	pthread_mutex_unlock(&p->d->last_eat_mutex);
+}
+
+void	*routine(void *random)
+{
+	t_philo	*p;
+
+	p = (t_philo *)random;
+	if (only_one_philo(p))
+		return (NULL);
+	sleep_phi(p);
 	pthread_create(&p->thread_eat, NULL, verif_dead, (void *)p);
 	while (1)
 	{
